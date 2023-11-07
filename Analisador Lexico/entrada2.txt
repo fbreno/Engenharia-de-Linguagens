@@ -1,0 +1,20 @@
+vazio insertionSort(int vetor[], int n) {
+    int k; 
+    int j; 
+    int aux;
+
+    para (k = 1; k < n; k++) {
+        aux = vetor[k];
+        j = k - 1;
+
+        enquanto (j >= 0 && aux < vetor[j]) {
+            vetor[j + 1] = vetor[j];
+            j--;
+        }
+
+        vetor[j + 1] = aux;
+    }
+}
+/*
+Apenas um comentário
+*/
