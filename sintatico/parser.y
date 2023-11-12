@@ -9,9 +9,9 @@ int yywrap(void) {
 }
 %}
 
-%token INT CHAR SHORT LONG VOID FLOAT DOUBLE FOR STRUCT PRINT PRINTF SCANF WHILE IF ELSE ELSE BREAK CONTINUE
+%token INT CHAR SHORT LONG VOID FLOAT DOUBLE FOR STRUCT PRINT PRINTF SCANF WHILE IF ELSE BREAK CONTINUE
 %token TRUE FALSE RETURN IMPORT SEMICOLON COLON ASSIGN PLUS PLUSPLUS MINUS MINUSMINUS TIMES DIVIDE REST_OF_DIVISION
-%token GT LT LE GE EQ NE LEFT_PARENTHESIS RIGHT_PARENTHESIS 
+%token GT LT LE GE EQ NE LEFT_PARENTHESIS RIGHT_PARENTHESIS NUMBER
 %token LEFT_BRACKET RIGHT_BRACKET LEFT_BRACE RIGHT_BRACE LOGIC_AND LOGIC_OR NOT
 
 
@@ -51,7 +51,6 @@ statement: expression_statement
          | selection_statement
          | iteration_statement
          | jump_statement
-         | COMMENT
          ;
 
 expression_statement: ';'
@@ -88,10 +87,10 @@ assignment_expression: conditional_expression
                   ;
 
 assignment_operator: ASSIGN
-                 | TIMES_ASSIGN
-                 | DIVIDE_ASSIGN
-                 | PLUS_ASSIGN
-                 | MINUS_ASSIGN
+                 | TIMES
+                 | DIVIDE
+                 | PLUS
+                 | MINUS
                  ;
 
 conditional_expression: logical_or_expression
@@ -137,8 +136,6 @@ unary_expression: postfix_expression
 postfix_expression: primary_expression
                | postfix_expression '[' expression ']'
                | postfix_expression '(' argument_expression_list_opt ')'
-               | postfix_expression INC_OP
-               | postfix_expression DEC_OP
                ;
 
 argument_expression_list_opt: /* empty */
