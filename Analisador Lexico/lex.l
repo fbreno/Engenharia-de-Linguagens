@@ -6,66 +6,79 @@
 
 [ \t]                 ;
 [ \n]                 {yylineno = yylineno + 1;}
-","                   {printf("COMMA \n");}
-[0-9]+                {printf("NUMBER(%s)\n",yytext);}
-(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*) {printf("Comment: %s.\n", yytext);}
+","                   {return COMMA ;}
+[0-9]+                {yylval.num = atoi(yytext); return NUMBER;}
+"/*"                   { /* Início de um comentário em bloco */
+                        while (1) {
+                            char c = input();
+                            if (c == EOF) {
+                                fprintf(stderr, "Comentário em bloco não fechado\n");
+                                break;
+                            } else if (c == '*' && input() == '/') {
+                                break; // Fim do comentário em bloco
+                            }
+                        }
+                      }
 
-"int"                 {printf("INT \n");}
-"char"                {printf("CHAR \n");}
-"short"               {printf("SHORT \n");}
-"long"                {printf("LONG\n");}
-"vazio"               {printf("VOID \n");}
-"float"               {printf("FLOAT \n");}
-"double"              {printf("DOUBLE \n");}
+"//"                   { /* Início de um comentário de linha */
+                        while (1) {
+                            char c = input();
+                            if (c == EOF || c == '\n') {
+                                unput(c);
+                                break; // Fim do comentário de linha
+                            }
+                        }
+                      }
 
-"para"                {printf("FOR \n");}
-"struct"              {printf("STRUCT \n");}
-"escreva"             {printf("PRINT \n");}
-"escreval"            {printf("PRINTF \n");}
-"leia"                {printf("SCANF \n");}
-"enquanto"            {printf("WHILE \n");}
-"se"      	          {printf("IF \n");}
-"senao se"            {printf("ELSE IF \n");}
-"senao"      	        {printf("ELSE \n");}
-"sair"                {printf("BREAK \n");}
-"continue"            {printf("CONTINUE \n");}
-"verdadeiro"          {printf("TRUE \n");}
-"falso"               {printf("FALSE \n");}
-"retorne"             {printf("RETURN \n");}
-"importe"             {printf("IMPORT \n");}
-
-";"      	            {printf("SEMICOLON \n");}
-"."                   {printf("COLON \n");}
-"="		                {printf("ASSIGN \n");}
-"+"                   {printf("PLUS \n");}
-"++"                  {printf("PLUSPLUS \n");}
-"-"                   {printf("MINUS \n");}
-"--"                  {printf("MINUSMINUS \n");}
-"*"                   {printf("TIMES \n");}
-"/"                   {printf("DIVIDE \n");}
-"%"                   {printf("REST_OF_DIVISION \n");}
-
-">"                   {printf ("GT \n");}
-"<"                   {printf ("LT \n");}
-"<="                  {printf ("LE \n");}
-">="                  {printf ("GE \n");}
-"=="                  {printf ("EQ \n");}
-"!="                  {printf ("NE \n");}
-
-"("                   {printf("LEFT_PARENTHESIS \n");}
-")"                   {printf("RIGHT_PARENTHESIS \n");}
-"["                   {printf("LEFT_BRACKET \n");}
-"]"                   {printf("RIGHT_BRACKET \n");}
-"{"                   {printf("LEFT_BRACE \n");}
-"}"                   {printf("RIGHT_BRACE \n");}
-
-"&&"                  {printf("LOGIC_AND \n");}
-"||"                  {printf("LOGIC_OR \n");}
-"!"                   {printf("NOT \n");}
-
-[a-zA-Z][a-zA-Z0-9]*  {printf("ID(%s)\n",yytext);}
-.                     {printf("invalid character \n");}
-
+"int"                 {return INT ;}
+"char"                {return CHAR ;}
+"short"               {return SHORT ;}
+"long"                {return LONG;}
+"vazio"               {return VOID ;}
+"float"               {return FLOAT ;}
+"double"              {return DOUBLE ;}
+"para"                {return FOR ;}
+"struct"              {return STRUCT ;}
+"escreva"             {return PRINT ;}
+"escreval"            {return PRINTF ;}
+"leia"                {return SCANF ;}
+"enquanto"            {return WHILE ;}
+"se"      	          {return IF ;}
+"senao se"            {return ELSE IF ;}
+"senao"      	        {return ELSE ;}
+"sair"                {return BREAK ;}
+"continue"            {return CONTINUE ;}
+"verdadeiro"          {return TRUE ;}
+"falso"               {return FALSE ;}
+"retorne"             {return RETURN ;}
+"importe"             {return IMPORT ;}
+";"      	            {return SEMICOLON ;}
+"."                   {return COLON ;}
+"="		                {return ASSIGN ;}
+"+"                   {return PLUS ;}
+"++"                  {return PLUSPLUS ;}
+"-"                   {return MINUS ;}
+"--"                  {return MINUSMINUS ;}
+"*"                   {return TIMES ;}
+"/"                   {return DIVIDE ;}
+"%"                   {return REST_OF_DIVISION ;}
+">"                   {return GT;}
+"<"                   {return LT;}
+"<="                  {return LE;}
+">="                  {return GE;}
+"=="                  {return EQ;}
+"!="                  {return NE;}
+"("                   {return LEFT_PARENTHESIS;}
+")"                   {return RIGHT_PARENTHESIS;}
+"["                   {return LEFT_BRACKET;}
+"]"                   {return RIGHT_BRACKET;}
+"{"                   {return LEFT_BRACE;}
+"}"                   {return RIGHT_BRACE;}
+"&&"                  {return LOGIC_AND;}
+"||"                  {return LOGIC_OR;}
+"!"                   {return NOT;}
+[a-zA-Z][a-zA-Z0-9]*  {return ID(%s)\n",yytext;}
+.                     {return invalid character;}
 %%
 
 #ifndef yywrap
