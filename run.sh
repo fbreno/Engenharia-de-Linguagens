@@ -15,34 +15,29 @@ lexico_dir="lexico"
 # Caminho para o diretório sintatico
 sintatico_dir="sintatico"
 
-# Nome do arquivo de link
-link_file="run_link"
+# Nome do arquivo de saída
+output_file="run_output"
 
-# Verifica se o diretório lexico existe
-if [ -d "$lexico_dir" ]; then
-    echo "Executando lex no arquivo $lexico_dir/lex.l"
-    lex $lexico_dir/lex.l
-else
-    echo "O diretório $lexico_dir não existe."
-    exit 1
-fi
+# Copia lex.l e parser.y para a pasta raiz, se ainda não estiverem presentes
+cp -n $lexico_dir/lex.l .
+cp -n $sintatico_dir/parser.y .
 
-# Verifica se o diretório sintatico existe
-if [ -d "$sintatico_dir" ]; then
-    echo "Executando yacc no arquivo $sintatico_dir/parser.y com os argumentos -d -v -g"
-    yacc -d -v -g $sintatico_dir/parser.y
+# Executa lex no arquivo lex.l
+echo "Executando lex no arquivo lex.l"
+lex lex.l
 
-    # Compila os arquivos gerados por lex e yacc
-    echo "Compilando os arquivos gerados por lex e yacc..."
-    gcc lex.yy.c y.tab.c -o $link_file
+# Executa yacc no arquivo parser.y com os argumentos -d -v -g
+echo "Executando yacc no arquivo parser.y com os argumentos -d -v -g"
+yacc -d -v -g parser.y
 
-    # Cria um arquivo de link na pasta raiz
-    ln -s $sintatico_dir/$link_file ./$link_file
+# Compila os arquivos gerados por lex e yacc
+echo "Compilando os arquivos gerados por lex e yacc..."
+gcc lex.yy.c y.tab.c -o $output_file
 
-    # Executa o programa compilado com o parâmetro fornecido
-    echo "Executando ./$link_file com o parâmetro: $parametro"
-    ./$link_file "$parametro"
-else
-    echo "O diretório $sintatico_dir não existe."
-    exit 1
-fi
+# Executa o programa compilado com o parâmetro fornecido
+echo "Executando ./$output_file com o parâmetro: $parametro"
+./$output_file "$parametro"
+
+# Exclui as cópias dos arquivos
+echo "Excluindo as cópias dos arquivos..."
+rm lex.l parser.y
