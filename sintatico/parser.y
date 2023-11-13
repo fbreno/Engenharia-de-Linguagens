@@ -11,7 +11,7 @@ int yywrap(void) {
 
 %token INT CHAR SHORT LONG VOID FLOAT DOUBLE FOR STRUCT PRINT PRINTF SCANF WHILE IF ELSE BREAK CONTINUE
 %token TRUE FALSE RETURN IMPORT SEMICOLON COLON ASSIGN PLUS PLUSPLUS MINUS MINUSMINUS TIMES DIVIDE REST_OF_DIVISION
-%token GT LT LE GE EQ NE LEFT_PARENTHESIS RIGHT_PARENTHESIS NUMBER
+%token GT LT LE GE EQ NE LEFT_PARENTHESIS RIGHT_PARENTHESIS NUMBER ID
 %token LEFT_BRACKET RIGHT_BRACKET LEFT_BRACE RIGHT_BRACE LOGIC_AND LOGIC_OR NOT
 
 
@@ -24,13 +24,20 @@ statement:  declaration
             | statement declaration
             ;
 
+type_specifier: INT
+              | CHAR
+              | LONG
+              | VOID
+              | FLOAT
+              | DOUBLE
+              | STRUCT
+                ;
+
 declaration: type_specifier ID SEMICOLON
            | type_specifier ID '(' parameter_list_opt ')' compound_statement
            ;
 
-parameter_list_opt: /* empty */
-                 | parameter_list
-                 ;
+parameter_list_opt: parameter_list;
 
 parameter_list: parameter_declaration
               | parameter_list ',' parameter_declaration
@@ -42,9 +49,7 @@ parameter_declaration: type_specifier ID
 compound_statement: '{' statement_list '}'
                  ;
 
-statement_list: /* empty */
-              | statement_list statement
-              ;
+statement_list: statement_list statement;
 
 statement: expression_statement
          | compound_statement
@@ -65,13 +70,9 @@ iteration_statement: WHILE '(' expression ')' statement
                  | FOR '(' expression_statement_opt expression_opt ';' expression_opt ')' statement
                  ;
 
-expression_statement_opt: /* empty */
-                     | expression_statement
-                     ;
+expression_statement_opt: expression_statement;
 
-expression_opt: /* empty */
-             | expression
-             ;
+expression_opt: expression;
 
 jump_statement: BREAK SEMICOLON
              | CONTINUE SEMICOLON
@@ -138,9 +139,7 @@ postfix_expression: primary_expression
                | postfix_expression '(' argument_expression_list_opt ')'
                ;
 
-argument_expression_list_opt: /* empty */
-                         | argument_expression_list
-                         ;
+argument_expression_list_opt: argument_expression_list;
 
 argument_expression_list: assignment_expression
                    | argument_expression_list ',' assignment_expression
