@@ -1,42 +1,24 @@
 %{
   #include <stdio.h>  
+  #include "y.tab.h"
+  
+  extern int yyerror (char *msg);  
+
 %}
 
 %%
 
 [ \t]                 ;
 [ \n]                 {yylineno = yylineno + 1;}
-","                   {return COMMA ;}
+","                   {return yytext[0];}
 [0-9]+                {yylval.num = atoi(yytext); return NUMBER;}
-"/*"                   { /* Início de um comentário em bloco */
-                        while (1) {
-                            char c = input();
-                            if (c == EOF) {
-                                fprintf(stderr, "Comentário em bloco não fechado\n");
-                                break;
-                            } else if (c == '*' && input() == '/') {
-                                break; // Fim do comentário em bloco
-                            }
-                        }
-                      }
-
-"//"                   { /* Início de um comentário de linha */
-                        while (1) {
-                            char c = input();
-                            if (c == EOF || c == '\n') {
-                                unput(c);
-                                break; // Fim do comentário de linha
-                            }
-                        }
-                      }
-
 "int"                 {return INT ;}
 "char"                {return CHAR ;}
-"short"               {return SHORT ;}
 "long"                {return LONG;}
 "vazio"               {return VOID ;}
 "float"               {return FLOAT ;}
 "double"              {return DOUBLE ;}
+"booleano"            {return BOOLEAN;}
 "para"                {return FOR ;}
 "struct"              {return STRUCT ;}
 "escreva"             {return PRINT ;}
@@ -52,6 +34,7 @@
 "falso"               {return FALSE ;}
 "retorne"             {return RETURN ;}
 "importe"             {return IMPORT ;}
+"principal"           {return MAIN;}
 ";"      	            {return SEMICOLON ;}
 "."                   {return COLON ;}
 "="		                {return ASSIGN ;}
@@ -68,17 +51,19 @@
 ">="                  {return GE;}
 "=="                  {return EQ;}
 "!="                  {return NE;}
-"("                   {return LEFT_PARENTHESIS;}
-")"                   {return RIGHT_PARENTHESIS;}
-"["                   {return LEFT_BRACKET;}
-"]"                   {return RIGHT_BRACKET;}
-"{"                   {return LEFT_BRACE;}
-"}"                   {return RIGHT_BRACE;}
+"("                   {return yytext[0];}
+")"                   {return yytext[0];}
+"["                   {return yytext[0];}
+"]"                   {return yytext[0];}
+"{"                   {return yytext[0];}
+"}"                   {return yytext[0];}
 "&&"                  {return LOGIC_AND;}
 "||"                  {return LOGIC_OR;}
 "!"                   {return NOT;}
-[a-zA-Z][a-zA-Z0-9]*  {return ID(%s)\n",yytext;}
-.                     {return invalid character;}
+[a-zA-Z][a-zA-Z0-9]*	            {yylval.sValue = strdup(yytext);
+                                    return ID;}
+
+.                                 {yyerror("invalid character");}
 %%
 
 #ifndef yywrap
