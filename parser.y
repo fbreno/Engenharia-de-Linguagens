@@ -75,6 +75,28 @@ while_statement : WHILE '(' expression ')' '{' statements '}';
 
 return_statement : RETURN expression ';';
 
+expression : ID
+           | NUMBER
+           | ID ASSIGN expression
+           | expression PLUS expression
+           | expression MINUS expression
+           | expression TIMES expression
+           | expression DIVIDE expression
+           | expression REST_OF_DIVISION expression
+           | expression GT expression
+           | expression LT expression
+           | expression LE expression
+           | expression GE expression
+           | expression EQ expression
+           | expression NE expression
+           | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
+           | LOGIC_AND
+           | LOGIC_OR
+           | NOT expression
+           | PLUS expression
+           | MINUS expression
+           ;
+
 
 for_expression : /* Empty for an empty expression */
                | expression ';' expression ';' expression
