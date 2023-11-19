@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+
 extern int yylex();
 extern void yyerror(const char *s);
 
@@ -37,23 +38,25 @@ type_specifier: INT
               | VOID
               | FLOAT
               | DOUBLE
-              | STRUCT
               | BOOLEAN
+              | STRUCT /* Adicionado STRUCT */
                 ;
 
 parameter_list :  
-               | parameter parameter_list
+               | parameter
+               | parameter ',' parameter_list
                ;
 
 parameter : type_specifier ID;
 
 body_function : 
-              | return ';'
+              | return_statement
               | statement statements
               ;
 
 statements : 
-           | statement statements;
+           | statement statements
+           ;
 
 statement : 
           | declaration      
@@ -64,27 +67,19 @@ statement :
           | return_statement
           ;
 
-for_statement : FOR '(' for_expression ')' '{' statements '}'
+for_statement : FOR '(' for_expression ')' '{' statements '}';
 
-if_statement : IF '(' expression ')' '{' statements '}'
+if_statement : IF '(' expression ')' '{' statements '}';
 
-while_statement : WHILE '(' expression ')' '{' statements '}'
+while_statement : WHILE '(' expression ')' '{' statements '}';
 
-return_statement : RETURN expression ';'
+return_statement : RETURN expression ';';
 
 
-for_expression : FOR '(' ';' ';' ')'
-               | FOR '(' type_specifier atrib ',' expression, '' ')' 
-               |            
-
-               1.for(int i = 0 ; exp ; expressio) ; 
-               2.for( i = 0)
-               
-               type_specifier ATRIB, EXP, ATRIB
-               ATRIB, EXP, ATRIB
-
- 
-    
+for_expression : /* Empty for an empty expression */
+               | expression ';' expression ';' expression
+               | type_specifier ID ASSIGN expression ';' expression ';' expression
+               ;
 
 %%
 
