@@ -17,19 +17,21 @@ int yywrap(void) {
 %token TRUE FALSE RETURN IMPORT SEMICOLON ASSIGN PLUS PLUSPLUS MINUS MINUSMINUS TIMES DIVIDE REST_OF_DIVISION
 %token GT LT LE GE EQ NE LEFT_PARENTHESIS RIGHT_PARENTHESIS NUMBER ID
 %token LOGIC_AND LOGIC_OR NOT
-%token MAIN
+%token MAIN VALUE
 
 %%
 
 program: subps;
 
 subps: 
+    | subp
     | subp subps
     ;
 
 subp: funcao;
 
 funcao : type_specifier ID '(' parameter_list ')' '{' body_function '}'
+       | type_specifier MAIN '(' parameter_list ')' '{' body_function '}'
        ; 
 
 type_specifier: INT
@@ -50,7 +52,7 @@ parameter_list :
 parameter : type_specifier ID;
 
 body_function : 
-              | return_statement
+              | statement
               | statement statements
               ;
 
@@ -60,23 +62,43 @@ statements :
 
 statement : 
           | declaration      
-          | expression ';'
+          | expression SEMICOLON
           | for_statement
           | if_statement
           | while_statement
           | return_statement
           ;
+        
+declarations : 
+             | declaration
+             | declaration declarations
+             ;
 
-for_statement : FOR '(' for_expression ')' '{' statements '}';
+declaration : 
+            | type_specifier ID SEMICOLON
+            | type_specifier ID '[' NUMBER ']' SEMICOLON
+            ; 
 
-if_statement : IF '(' expression ')' '{' statements '}';
+assignment : ID ASSIGN VALUE
+            ;
 
-while_statement : WHILE '(' expression ')' '{' statements '}';
+for_statement : FOR '(' for_expression ')' '{' statements '}' ;
 
-return_statement : RETURN expression ';';
+while_statement : WHILE '(' expression ')' '{' statements '}' ;
 
-expression : ID
-           | NUMBER
+if_statement : IF '(' expression ')' '{' statements '}' 
+             | IF '(' expression ')' '{' statements '} else_statement
+             ;
+
+else_statement : ELSE '{' statements '}'   
+
+struct_statement : STRUCT ID '{' declarations '}' SEMICOLON ;
+
+return_statement : RETURN expression SEMICOLON
+                 | RETURN SEMICOLON
+                 ;
+
+expression : 
            | ID ASSIGN expression
            | expression PLUS expression
            | expression MINUS expression
@@ -89,18 +111,16 @@ expression : ID
            | expression GE expression
            | expression EQ expression
            | expression NE expression
+           | MINUSMINUS VALUE
+           | PLUSPLUS VALUE
            | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
-           | LOGIC_AND
-           | LOGIC_OR
            | NOT expression
-           | PLUS expression
-           | MINUS expression
            ;
 
 
 for_expression : /* Empty for an empty expression */
-               | expression ';' expression ';' expression
-               | type_specifier ID ASSIGN expression ';' expression ';' expression
+               | assignment SEMICOLON expression SEMICOLON expression
+               | type_specifier assignment SEMICOLON expression SEMICOLON expression
                ;
 
 %%
