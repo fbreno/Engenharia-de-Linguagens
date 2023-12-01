@@ -5,13 +5,17 @@
 extern int yylex();
 extern void yyerror(const char *s);
 
-int yywrap(void) {
-    return 1;
-}
 %}
 
+%union {
+	int    iValue; 	/* integer value */
+	float  fValue;  /* float value */
+  char   *strval;
+  char   *sValue;
+};
+
 %token INT CHAR LONG VOID FLOAT DOUBLE BOOLEAN 
-%token FOR WHILE STRUCT
+%token FOR WHILE STRUCT STRUCT_ID
 %token IF ELSE BREAK CONTINUE
 %token PRINT PRINTF SCANF 
 %token TRUE FALSE RETURN IMPORT SEMICOLON ASSIGN PLUS PLUSPLUS MINUS MINUSMINUS TIMES DIVIDE REST_OF_DIVISION
@@ -19,19 +23,25 @@ int yywrap(void) {
 %token LOGIC_AND LOGIC_OR NOT
 %token MAIN VALUE
 
+%left PLUS MINUS
+%left TIMES DIVIDE REST_OF_DIVISION
+%nonassoc GT LT LE GE EQ NE
+%right NOT
+%left PLUSPLUS MINUSMINUS
+
+%start program
 %%
 
 program: subps;
 
 subps: 
-    | subp
-    | subp subps
-    ;
+     | subp subps
+     ;
 
 subp: funcao;
 
-funcao : type_specifier ID '(' parameter_list ')' '{' body_function '}'
-       | type_specifier MAIN '(' parameter_list ')' '{' body_function '}'
+funcao : type_specifier ID LEFT_PARENTHESIS parameter_list RIGHT_PARENTHESIS '{' body_function '}' {printf("Reconheci regra da função 1 \n");}
+       | type_specifier MAIN LEFT_PARENTHESIS parameter_list RIGHT_PARENTHESIS '{' body_function '}'
        ; 
 
 type_specifier: INT
@@ -41,66 +51,73 @@ type_specifier: INT
               | FLOAT
               | DOUBLE
               | BOOLEAN
-              | STRUCT /* Adicionado STRUCT */
+              | STRUCT 
+              | STRUCT STRUCT_ID
                 ;
 
-parameter_list :  
+parameter_list :  {printf("param lista vazia\n");}
                | parameter
                | parameter ',' parameter_list
                ;
 
 parameter : type_specifier ID;
 
-body_function : 
-              | statement
-              | statement statements
-              ;
+body_function : statements;
+
+body_repetition_structure : statements_repetition_structure;
 
 statements : 
-           | statement statements
+           | statement SEMICOLON statements
            ;
 
-statement : 
-          | declaration      
-          | expression SEMICOLON
+statements_repetition_structure : 
+                     | statement_repetition_structure SEMICOLON statements_repetition_structure
+                     ;
+
+statement : declaration_list 
           | for_statement
           | if_statement
           | while_statement
           | return_statement
+          | struct_statement
           ;
-        
-declarations : 
-             | declaration
-             | declaration declarations
-             ;
 
-declaration : 
-            | type_specifier ID SEMICOLON
-            | type_specifier ID '[' NUMBER ']' SEMICOLON
+statement_repetition_structure: declaration_list 
+                              | for_statement
+                              | if_statement
+                              | while_statement
+                              | return_statement
+                              ;
+        
+declaration_list :
+                 | declaration  declaration_list
+                 ;
+
+declaration : type_specifier ID 
+            | type_specifier ID '[' NUMBER ']'
             ; 
 
 assignment : ID ASSIGN VALUE
-            ;
+           | ID ASSIGN expression
+           ;
 
-for_statement : FOR '(' for_expression ')' '{' statements '}' ;
+for_statement : FOR LEFT_PARENTHESIS for_expression RIGHT_PARENTHESIS '{' body_repetition_structure'}' ;
 
-while_statement : WHILE '(' expression ')' '{' statements '}' ;
+while_statement : WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS '{' body_repetition_structure'}' ;
 
-if_statement : IF '(' expression ')' '{' statements '}' 
-             | IF '(' expression ')' '{' statements '} else_statement
+if_statement : IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS '{' body_function '}' 
+             | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS '{' body_function '}' else_statement
              ;
 
 else_statement : ELSE '{' statements '}'   
 
-struct_statement : STRUCT ID '{' declarations '}' SEMICOLON ;
+struct_statement : STRUCT STRUCT_ID '{' declaration_list '}';
 
-return_statement : RETURN expression SEMICOLON
-                 | RETURN SEMICOLON
+return_statement : RETURN expression
+                 | RETURN 
                  ;
 
-expression : 
-           | ID ASSIGN expression
-           | expression PLUS expression
+expression : expression PLUS expression
            | expression MINUS expression
            | expression TIMES expression
            | expression DIVIDE expression
@@ -113,23 +130,13 @@ expression :
            | expression NE expression
            | MINUSMINUS VALUE
            | PLUSPLUS VALUE
-           | LEFT_PARENTHESIS expression RIGHT_PARENTHESIS
            | NOT expression
            ;
 
 
-for_expression : /* Empty for an empty expression */
+for_expression : SEMICOLON SEMICOLON
                | assignment SEMICOLON expression SEMICOLON expression
                | type_specifier assignment SEMICOLON expression SEMICOLON expression
                ;
 
 %%
-
-void yyerror(const char *s) {
-    fprintf(stderr, "Error: %s\n", s);
-}
-
-int main(void) {
-    yyparse();
-    return 0;
-}

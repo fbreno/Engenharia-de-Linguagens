@@ -1,0 +1,298 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+
+extern int yylex();
+extern void yyerror(const char *s);
+
+%}
+
+%union {
+	int    iValue; 
+	char   cValue; 	
+	float  fValue; 
+	double dvalue;
+	struct record * rec;
+};
+
+%token <iValue> INT 
+%token <cValue> CHAR 
+%token <fValue> FLOAT 
+%token <dValue> DOUBLE 
+%token VOID BOOLEAN 
+%token FOR WHILE STRUCT STRUCT_ID
+%token IF ELSE BREAK CONTINUE
+%token PRINT PRINTF SCANF 
+%token TRUE FALSE RETURN IMPORT SEMICOLON ASSIGN PLUS PLUSPLUS MINUS MINUSMINUS TIMES DIVIDE REST_OF_DIVISION
+%token GT LT LE GE EQ NE LEFT_PARENTHESIS RIGHT_PARENTHESIS NUMBER ID
+%token LOGIC_AND LOGIC_OR NOT
+%token MAIN VALUE
+
+%left PLUS MINUS
+%left TIMES DIVIDE REST_OF_DIVISION
+%nonassoc GT LT LE GE EQ NE
+%right NOT
+%left PLUSPLUS MINUSMINUS
+
+%start program
+
+%%
+
+program: subps;
+
+subps: 
+     | subp subps
+     ;
+
+subp: funcao;
+
+funcao : type_specifier ID LEFT_PARENTHESIS parameter_list RIGHT_PARENTHESIS '{' body_function '}'
+        { char * s1 = cat($1, " ", $2, "(" , $4->code, ")" );
+          char * s2 = cat(s1, "{" , "\n" , $7->code, "\n", "}" );
+          free(s1);
+          free($1);
+          free($2);
+          freeRecord($4);
+          freeRecord($7);
+          $$ = createRecord("s2", "");
+          free(s2);
+        }
+       | type_specifier MAIN LEFT_PARENTHESIS parameter_list RIGHT_PARENTHESIS '{' body_function '}'
+       { char * s1 = cat($1," main ", $2, "(" , $4->code, ")" );
+          char * s2 = cat(s1, "{" , "\n" , $7->code, "\n", "}" );
+          free(s1);
+          free($1);
+          free($2);
+          freeRecord($4);
+          freeRecord($7);
+          $$ = createRecord("s2", "");
+          free(s2);
+        }
+       ; 
+
+type_specifier: INT {$$ = createRecord($1, "");
+                   free($1);}
+              | CHAR {$$ = createRecord($1, "");
+                   free($1);}
+              | VOID {$$ = createRecord($1, "");
+                   free($1);}
+              | FLOAT {$$ = createRecord($1, "");
+                   free($1);}
+              | DOUBLE {$$ = createRecord($1, "");
+                   free($1);}
+              | BOOLEAN {$$ = createRecord($1, "");
+                   free($1);}
+              | STRUCT {$$ = createRecord($1, "");
+                   free($1);}
+              | STRUCT STRUCT_ID {$$ = createRecord($1, "");
+                   free($1);}
+                ;
+
+parameter_list :  
+               | parameter
+               | parameter ',' parameter_list
+               ;
+
+parameter : type_specifier ID 
+                  {$$ = createRecord($1, $2);
+                   free($1);
+                   free($2);
+                  }              
+          ;
+
+body_function : statements;
+
+body_repetition_structure : statements_repetition_structure;
+
+statements : 
+           | statement SEMICOLON statements
+           ;
+
+statements_repetition_structure : 
+                     | statement_repetition_structure SEMICOLON statements_repetition_structure
+                     ;
+
+statement : declaration_list 
+          | for_statement
+          | if_statement
+          | while_statement
+          | return_statement
+          | struct_statement
+          ;
+
+statement_repetition_structure: declaration_list 
+                              | for_statement
+                              | if_statement
+                              | while_statement
+                              | return_statement
+                              ;
+        
+declaration_list :
+                 | declaration  declaration_list
+                 ;
+
+declaration : type_specifier ID 
+            | type_specifier ID '[' NUMBER ']'
+            ; 
+
+assignment : ID ASSIGN VALUE
+           | ID ASSIGN expression
+           ;
+
+for_statement : FOR LEFT_PARENTHESIS for_expression RIGHT_PARENTHESIS '{' body_repetition_structure'}' ;
+
+while_statement : WHILE LEFT_PARENTHESIS expression RIGHT_PARENTHESIS '{' body_repetition_structure'}' ;
+
+if_statement : IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS '{' body_function '}' 
+             | IF LEFT_PARENTHESIS expression RIGHT_PARENTHESIS '{' body_function '}' else_statement
+             ;
+
+else_statement : ELSE '{' statements '}'   
+
+struct_statement : STRUCT STRUCT_ID '{' declaration_list '}';
+
+return_statement : RETURN
+                 | RETURN expression
+                 ;
+
+expression : expression PLUS expression
+            { 
+              char * s1 = cat($1->code, "+", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression MINUS expression
+            { 
+              char * s1 = cat($1->code, "-", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression TIMES expression
+            { 
+              char * s1 = cat($1->code, "*", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression DIVIDE expression
+            { 
+              char * s1 = cat($1->code, "/", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression REST_OF_DIVISION expression
+            { 
+              char * s1 = cat($1->code, "%", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression GT expression
+            { 
+              char * s1 = cat($1->code, ">", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression LT expression
+            { 
+              char * s1 = cat($1->code, "<", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression LE expression
+            { 
+              char * s1 = cat($1->code, "<=", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression GE expression
+            { 
+              char * s1 = cat($1->code, ">=", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression EQ expression
+            { 
+              char * s1 = cat($1->code, "==", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | expression NE expression
+            { 
+              char * s1 = cat($1->code, "!=", $2->code);
+              $$ = createRecord("s1", "");            
+              freeRecord($1);
+              freeRecord($2);
+              free(s1);
+            } 
+           | MINUSMINUS VALUE
+            {
+              $$ = createRecord("--", $2);            
+              freeRecord($2);
+            } 
+           | PLUSPLUS VALUE
+            {
+              $$ = createRecord("++", $2);            
+              freeRecord($2);
+            } 
+           | NOT expression
+            {
+              char * s1 = cat("!", "(", $2->code, ")");
+              $$ = createRecord("s1", "");            
+              freeRecord($2);
+              free(s1);
+            } 
+           ;
+
+
+for_expression : SEMICOLON SEMICOLON 
+               | assignment SEMICOLON expression SEMICOLON expression
+               | type_specifier assignment SEMICOLON expression SEMICOLON expression
+               ;
+
+%%
+
+void yyerror(const char *s) {
+    fprintf(stderr, "Error: %s\n", s);
+}
+
+int main(void) {
+    yyparse();
+    return 0;
+}
+
+
+char * cat(char * s1, char * s2, char * s3, char * s4, char * s5){
+  int tam;
+  char * output;
+
+  tam = strlen(s1) + strlen(s2) + strlen(s3) + strlen(s4) + strlen(s5)+ 1;
+  output = (char *) malloc(sizeof(char) * tam);
+  
+  if (!output){
+    printf("Allocation problem. Closing application...\n");
+    exit(0);
+  }
+  
+  sprintf(output, "%s%s%s%s%s", s1, s2, s3, s4, s5);
+  
+  return output;
+}

@@ -1,69 +1,72 @@
 %{
   #include <stdio.h>  
   #include "y.tab.h"
-  
-  extern int yyerror (char *msg);  
-
 %}
 
 %%
 
 [ \t]                 ;
 [ \n]                 {yylineno = yylineno + 1;}
-","                   {return yytext[0];}
-[0-9]+                {yylval.num = atoi(yytext); return NUMBER;}
-"int"                 {return INT ;}
-"char"                {return CHAR ;}
-"long"                {return LONG;}
-"vazio"               {return VOID ;}
-"float"               {return FLOAT ;}
-"double"              {return DOUBLE ;}
-"booleano"            {return BOOLEAN;}
-"para"                {return FOR ;}
-"struct"              {return STRUCT ;}
-"escreva"             {return PRINT ;}
-"escreval"            {return PRINTF ;}
-"leia"                {return SCANF ;}
-"enquanto"            {return WHILE ;}
-"se"      	          {return IF ;}
-"senao se"            {return ELSE IF ;}
-"senao"      	        {return ELSE ;}
-"sair"                {return BREAK ;}
-"continue"            {return CONTINUE ;}
-"verdadeiro"          {return TRUE ;}
-"falso"               {return FALSE ;}
-"retorne"             {return RETURN ;}
-"importe"             {return IMPORT ;}
-"principal"           {return MAIN;}
-";"      	            {return SEMICOLON ;}
-"."                   {return COLON ;}
-"="		                {return ASSIGN ;}
-"+"                   {return PLUS ;}
-"++"                  {return PLUSPLUS ;}
-"-"                   {return MINUS ;}
-"--"                  {return MINUSMINUS ;}
-"*"                   {return TIMES ;}
-"/"                   {return DIVIDE ;}
-"%"                   {return REST_OF_DIVISION ;}
-">"                   {return GT;}
-"<"                   {return LT;}
-"<="                  {return LE;}
-">="                  {return GE;}
-"=="                  {return EQ;}
-"!="                  {return NE;}
-"("                   {return yytext[0];}
-")"                   {return yytext[0];}
-"["                   {return yytext[0];}
-"]"                   {return yytext[0];}
-"{"                   {return yytext[0];}
-"}"                   {return yytext[0];}
-"&&"                  {return LOGIC_AND;}
-"||"                  {return LOGIC_OR;}
-"!"                   {return NOT;}
-[a-zA-Z][a-zA-Z0-9]*	            {yylval.sValue = strdup(yytext);
-                                    return ID;}
+","                   {printf("COMMA \n");}
+[0-9]+                {printf("NUMBER(%s)\n",yytext);}
+(\/\*([^*]|[\r\n]|(\*+([^*\/]|[\r\n])))*\*+\/)|(\/\/.*) {printf("Comment: %s.\n", yytext);}
 
-.                                 {yyerror("invalid character");}
+"int"                 {/*printf("INT \n");*/return INT ;}
+"char"                {/*printf("CHAR \n");*/return CHAR ;}
+"vazio"               {/*printf("VOID \n");*/return VOID ;}
+"float"     {/*printf("FLOAT \n");*/ yylval.fValue = atof(yytext); return FLOAT;}
+"double"              {/*printf("DOUBLE \n");*/return DOUBLE ;}
+
+"para"                {/*printf("FOR \n");*/return FOR ;}
+"struct"[\t]+[a-zA-Z_][a-zA-Z0-9]* {printf("STRUCT ID \n"); yylval.strval = strdup(yytext + 6); return STRUCT_ID;}
+"struct"              {/*printf("STRUCT ID \n");*/return STRUCT ;}
+
+"escreva"             {/*printf("PRINT\n");*/return PRINT ;}
+"escreval"            {/*printf("PRINTF \n");*/return PRINTF ;}
+
+"leia"                {/*printf("SCANF \n");*/return SCANF ;}
+"enquanto"            {/*printf("WHILE \n");*/return WHILE ;}
+"se"      	          {/*printf("IF \n");*/return IF ;}
+"senao"      	        {/*printf("ELSE \n");*/return ELSE ;}
+"sair"                {/*printf("BREAK \n");*/return BREAK ;}
+"continue"            {/*printf("CONTINUE \n");*/return CONTINUE ;}
+"verdadeiro"          {/*printf("TRUE \n");*/return TRUE ;}
+"falso"               {/*printf("FALSE \n");*/return FALSE ;}
+"retorne"             {/*printf("RETURN \n");*/return RETURN ;}
+"importe"             {/*printf("IMPORT \n");*/return IMPORT ;}
+"principal"           {/*printf("MAIN \n");*/return MAIN;}
+
+";"      	            {/*printf("SEMICOLON \n");*/return SEMICOLON ;}
+"="		                {/*printf("ASSIGN \n");*/return ASSIGN ;}
+"+"                   {/*printf("PLUS \n");*/return PLUS ;}
+"++"                  {/*printf("PLUSPLUS \n");*/return PLUSPLUS ;}
+"-"                   {/*printf("MINUS \n");*/return MINUS ;}
+"--"                  {/*printf("MINUSMINUS \n");*/return MINUSMINUS ;}
+"*"                   {/*printf("TIMES \n");*/return TIMES ;}
+"/"                   {/*printf("DIVIDE \n");*/return DIVIDE ;}
+"%"                   {/*printf("REST_OF_DIVISION \n");*/return REST_OF_DIVISION ;}
+
+">"                   {/*printf ("GT \n");*/return GT;}
+"<"                   {/*printf ("LT \n");*/return LT;}
+"<="                  {/*printf ("LE \n");*/return LE;}
+">="                  {/*printf ("GE \n");*/return GE;}
+"=="                  {/*printf ("EQ \n");*/return EQ;}
+"!="                  {/*printf ("NE \n");*/return NE;}
+
+"("                   {/*printf("LEFT_PARENTHESIS \n");*/return yytext[0];}
+")"                   {/*printf("RIGHT_PARENTHESIS \n");*/return yytext[0];}
+"["                   {/*printf("LEFT_BRACKET \n");*/return yytext[0];}
+"]"                   {/*printf("RIGHT_BRACKET \n");*/return yytext[0];}
+"{"                   {/*printf("LEFT_BRACE \n");*/return yytext[0];}
+"}"                   {/*printf("RIGHT_BRACE \n");*/return yytext[0];}
+
+"&&"                  {/*printf("LOGIC_AND \n");*/return LOGIC_AND;}
+"||"                  {/*printf("LOGIC_OR \n");*/return LOGIC_OR;}
+"!"                   {/*printf("NOT \n");*/return NOT;}
+
+[a-zA-Z][a-zA-Z0-9]*  {printf("ID(%s)\n",yytext);}
+.                     {printf("invalid character \n");}
+
 %%
 
 #ifndef yywrap
@@ -74,4 +77,8 @@ int main(void)
 {
   yylex();
   return 0;
+}
+
+void yyerror(char *msg) {
+    fprintf(stderr, "%s\n", msg);
 }
